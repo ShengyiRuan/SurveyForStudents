@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Survey</title>
+    <style>
+        label { display: block; }
+    </style>
+</head>
+<body>
+    <h1>Student Survey</h1>
+    <form id="surveyForm" onsubmit="handleSubmit(event)"></form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const version = Math.random() < 0.5 ? 1 : 2; // Randomly select a version
+            const form = document.getElementById('surveyForm');
+            form.innerHTML = version === 1 ? generateFormVersion1() : generateFormVersion2();
+            form.version = version; // Store the version inside the form for submission
+            form.appendChild(createSubmitButton());
+        });
+
+        function generateFormVersion1() {
+            return `
+                <p><label>Student ID: <input type="text" name="student_id" required></label></p>
+                <label>What is your favorite color?</label>
+                <p>
+                    <label><input type="radio" name="Q1_Answer" value="1"> Blue</label>
+                    <label><input type="radio" name="Q1_Answer" value="2"> Green</label>
+                </p>
+                <label>Which of the following fruits do you like?</label>
+                <p>
+                    <label><input type="checkbox" name="Q2_Answer" value="1"> Apple</label>
+                    <label><input type="checkbox" name="Q2_Answer" value="2"> Banana</label>
+                </p>
+                <label>What is your favorite sport?</label>
+                <p>
+                    <label><input type="radio" name="Q3_Answer" value="1"> Football</label>
+                    <label><input type="radio" name="Q3_Answer" value="2"> Basketball</label>
+                </p>
+                <label>Which of these countries have you visited?</label>
+                <p>
+                    <label><input type="checkbox" name="Q4_Answer" value="1"> USA</label>
+                    <label><input type="checkbox" name="Q4_Answer" value="2"> Canada</label>
+                </p>
+                <label>What is your preferred type of vacation?</label>
+                <p>
+                    <label><input type="radio" name="Q5_Answer" value="1"> Beach</label>
+                    <label><input type="radio" name="Q5_Answer" value="2"> Mountains</label>
+                </p>
+            `;
+        }
+
+        function generateFormVersion2() {
+            return `
+                <p><label>Student ID: <input type="text" name="student_id" required></label></p>
+                <label>What type of movies do you like?</label>
+                <p>
+                    <label><input type="radio" name="Q6_Answer" value="1"> Action</label>
+                    <label><input type="radio" name="Q6_Answer" value="2"> Comedy</label>
+                </p>
+                <label>Which of these pets would you prefer?</label>
+                <p>
+                    <label><input type="checkbox" name="Q7_Answer" value="1"> Dog</label>
+                    <label><input type="checkbox" name="Q7_Answer" value="2"> Cat</label>
+                </p>
+                <label>What type of music do you enjoy?</label>
+                <p>
+                    <label><input type="radio" name="Q8_Answer" value="1"> Pop</label>
+                    <label><input type="radio" name="Q8_Answer" value="2"> Rock</label>
+                </p>
+                <label>Which of these languages would you like to learn?</label>
+                <p>
+                    <label><input type="checkbox" name="Q9_Answer" value="1"> Spanish</label>
+                    <label><input type="checkbox" name="Q9_Answer" value="2"> French</label>
+                </p>
+                <label>What is your favorite season of the year?</label>
+                <p>
+                    <label><input type="radio" name="Q10_Answer" value="1"> Spring</label>
+                    <label><input type="radio" name="Q10_Answer" value="2"> Autumn</label>
+                </p>
+            `;
+        }
+
+        function createSubmitButton() {
+            const button = document.createElement('button');
+            button.type = 'submit';
+            button.textContent = 'Submit';
+            return button;
+        }
+
+        function handleSubmit(event) {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+          const data = {};
+          for (let [key, value] of formData.entries()) {
+              if (formData.getAll(key).length > 1) { // Handle checkboxes with multiple selections
+                  data[key] = formData.getAll(key).join(', ');
+              } else {
+                  data[key] = value || '0'; // Default unchecked checkboxes to '0'
+              }
+          }
+          data.version = event.target.version;  // Attach version number for submission
+
+          fetch('/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(data => alert('Survey submitted successfully!'))
+          .catch(error => console.error('Error:', error));
+        }
+
+    </script>
+</body>
+</html>
